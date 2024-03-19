@@ -1,27 +1,29 @@
-# fhir2es
+# fhir2sql
 
 # Installation
 
 ```
-npm i fhir2es
+npm i fhir2sql
 ```
 
 # Example Usage
 
 ```
-const { CacheFhirToES } = require('fhir2es')
+const { CacheFhirToES } = require('fhir2sql')
 
 let caching = new CacheFhirToES({
-  ESBaseURL: 'http://localhost:9200',
-  ESUsername: '',
-  ESPassword: '',
-  ESMaxCompilationRate: '10000/1m',
-  ESMaxScrollContext: '100000',
   FHIRBaseURL: 'http://localhost:8081/hapi/fhir',
   FHIRUsername: '',
   FHIRPassword: '',
   relationshipsIDs: [] //if not specified then all relationships will be processed
-  reset: false //default to false
+  reset: false, //default to false
+  ESModulesBasePath: "/var/lib/iHRIS/ihris-backend/namibia/modules/es",
+  DBConnection: {
+    database: "hapi",
+    username: "hapi",
+    password: "hapi",
+    dialect: "postgres" /* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */
+  }
 })
 caching.cache()
 ```
@@ -67,14 +69,14 @@ To add a primary resource, add a complex extension with url <http://ihris.org/St
 Since iHRISReportDetails is a complex extension, then it supports sub extensions and below are the possible subextensions that can be defined for the iHRISReportDetails
 
 - resource - This is the resource name to be used as the primary resource i.e Practitioner. This is mandatory.
-- name - This is the unique name of the primary resource, which will also be the name of the elasticsearch index. Other linked resources will use this name to reference this primary resource. This is mandatory
+- name - This is the unique name of the primary resource, which will also be the name of the table in the database. Other linked resources will use this name to reference this primary resource. This is mandatory
 - label - This is the display name of the entire report. This is mandatory.
 - query - This is the fhirpath to be used to filter out unwanted resources. i.e you may only be interested to have a report of female Practitioner, then for that case you will define a fhirpath like Practitioner.gender=female which will only allow female practitioners to be on the report. This is optional.
-- initialFilter - This works the same way as query, but this is the search parameter and it is always run only once when the report is cached for the first time. This was intended to improve caching speed. Take an example you want to cache Basic resources of profile type professions, without initialFilter, fhir2es will pull all the Basic resources (could be a thousand of them) and start processing each of them by applying a <b>query</b> to them.
-But if initialFilter is defined i.e _profile=professions, fhir2es will only pull Basic resources of profile type professions and start processing them. Since initialFilter is defined only once, then query must always be difined when initialFilter is defined and it must be a fhirpath relative to the initialFilter.
-The reason initialFilter is run only once, is because resources can be modified and we would want to remove from report/elastcisearch all the resources that no longer meets the condition.
+- initialFilter - This works the same way as query, but this is the search parameter and it is always run only once when the report is cached for the first time. This was intended to improve caching speed. Take an example you want to cache Basic resources of profile type professions, without initialFilter, fhir2sql will pull all the Basic resources (could be a thousand of them) and start processing each of them by applying a <b>query</b> to them.
+But if initialFilter is defined i.e _profile=professions, fhir2sql will only pull Basic resources of profile type professions and start processing them. Since initialFilter is defined only once, then query must always be difined when initialFilter is defined and it must be a fhirpath relative to the initialFilter.
+The reason initialFilter is run only once, is because resources can be modified and we would want to remove from report/database all the resources that no longer meets the condition.
 initialFilter is optional
-- cachingDisabled - Set this to true if you dont want fhir2es to cache data for this relationship and you can cache data on your own approach
+- cachingDisabled - Set this to true if you dont want fhir2sql to cache data for this relationship and you can cache data on your own approach
 - displayCheckbox - Set this to true if you want the report to have checkboxes for users to select a row
 - locationBasedConstraint - Set this to true if you want to restrict data access by user location
 - IhrisReportElement - This is a complex extension which now defines all the fields of this resource that you want to be available on your report. This will be covered on a separate section of its own.
@@ -174,12 +176,12 @@ Fields of a resource can be added using iHRISReportElement complex extension whi
 - fhirpath - This is the fhirpath expression for field value on the relationship
 - displayFormat - This can be defined if you are intending to modify or format the way field value is displayed i.e Adding extra texts to a value or even combining two fields values into a single display. This is a complex extension with below subextensions
   - format - This defines how you want to format the display, parameters are defined with %s. i.e if you are displaying age and you want the value to appear as 16 Years Old, the format will be %s Years Old, %s will be replaced with a respecitve age. Or if you want to display Full name instead of firstname and othernames separately, you can do %s %s as seen in below example
-  - order - This defines the parameter names in an order as defined by %s in the format element above, i.e if you had %s %s in the format, then ths means you must have two parameter names in the order separated by coma i.e given,family. This is telling fhir2es to replace the first %s in the format element with given and replace the second %s with family
+  - order - This defines the parameter names in an order as defined by %s in the format element above, i.e if you had %s %s in the format, then ths means you must have two parameter names in the order separated by coma i.e given,family. This is telling fhir2sql to replace the first %s in the format element with given and replace the second %s with family
   - paths:parameter_name:fhirpath - This now defines a fhirpath expression of all the parameter names defined with the order element. i.e in above we have given,family in order element, this means we must define fhirpath for both i.e paths:given:fhirpath = name.where(use='official').given and paths:family:fhirpath = name.where(use='official').family.
   - paths:parameter_name:join - This is optional, and it is used to join an array of values when a field is expected to contain an array of values. i.e we know given is an array, you can define paths:given:join = ", " to join given names with coma.
   displayFormat and fhirpath cant be defined together, you either define fhirpath or you define displayFormat
-- function - fhir2es allows you to define your own custom functions and use them to calculate field value. functions are defined within a module and they do accepts parameters.
-  - If you are running fhir2es inside iHRIS then your module function must be defined inside your custom site under the path iHRIS/ihris-backend/sitename/modules/es. - If you are running fhir2es outside iHRIS then you will have to define manually the base path to your modules, and this is done when creating fhir2es class using ESModulesBasePath: "/home/ally/mysoftware/modules/es". i.e
+- function - fhir2sql allows you to define your own custom functions and use them to calculate field value. functions are defined within a module and they do accepts parameters.
+  - If you are running fhir2sql inside iHRIS then your module function must be defined inside your custom site under the path iHRIS/ihris-backend/sitename/modules/es. - If you are running fhir2sql outside iHRIS then you will have to define manually the base path to your modules, and this is done when creating fhir2sql class using ESModulesBasePath: "/home/ally/mysoftware/modules/es". i.e
 
   ```
   const { CacheFhirToES } = require('./reports')
@@ -236,7 +238,7 @@ Fields of a resource can be added using iHRISReportElement complex extension whi
   - Parameter names are the fields that are already added on your relationship, it could be within the same linked resource or other resources within the relationship.
   - **function parameters must be enclosed between ({}) brackets, and for more than one parameters, separate them with coma i.e testmodule.age({dob, name})**
   - A field that uses function must be defined on your relationship after the fields it depends (parameters) i.e Age field must be defined after date of birth field.
-  - Fields that resolves to a reference can be used as well, fhir2es will use the corresponding resource name as value or you may define the displayFormat and specify the value for the field. An example could be, if you are adding PractitionerRole on the relationship, you can add a field Location by specifying fhirpath PractitionerRole.location and fhir2es will take of resolving the Location resource. Additionally you may specify a displayFormat to be used as covered above.
+  - Fields that resolves to a reference can be used as well, fhir2sql will use the corresponding resource name as value or you may define the displayFormat and specify the value for the field. An example could be, if you are adding PractitionerRole on the relationship, you can add a field Location by specifying fhirpath PractitionerRole.location and fhir2sql will take of resolving the Location resource. Additionally you may specify a displayFormat to be used as covered above.
   - If you enable locationBasedConstraint, make sure that you have a field ihris-related-group on your relationship which has a fhirpath resolving to a location.
 
   Here is a full example
