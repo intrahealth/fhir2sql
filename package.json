@@ -1,6 +1,6 @@
 {
-  "name": "fhir2es",
-  "version": "5.0.3",
+  "name": "fhir2sql",
+  "version": "1.0.0",
   "description": "Reads and caches fhir data to elasticsearch",
   "main": "reports.js",
   "scripts": {
@@ -8,29 +8,27 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/intrahealth/fhir2es.git"
+    "url": "git+https://github.com/intrahealth/fhir2sql.git"
   },
   "keywords": [
-    "fhir to elasticsearch",
-    "fhir2es",
+    "fhir to sql",
+    "fhir2sql",
     "fhir",
-    "elasticsearch",
-    "elasticsearch caching"
+    "fhir caching",
+    "fhir flattening"
   ],
   "author": "Ally Shaban",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/intrahealth/fhir2es/issues"
+    "url": "https://github.com/intrahealth/fhir2sql/issues"
   },
-  "homepage": "https://github.com/intrahealth/fhir2es",
+  "homepage": "https://github.com/intrahealth/fhir2sql",
   "dependencies": {
     "async": "^3.2.0",
     "axios": "^0.21.1",
     "fhirpath": "^3.5.0",
     "lodash": "^4.17.15",
     "moment": "^2.29.0",
-    "pg": "^8.11.3",
-    "pg-hstore": "^2.3.4",
     "pluralize": "^8.0.0",
     "sequelize": "^6.37.1",
     "sqlstring": "^2.3.3",
