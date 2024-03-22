@@ -643,7 +643,10 @@ class CacheFhirToES {
         } else {
           columns += `, ${column}`
         }
-        let value = sqlstring.escape(data[dt].trim())
+        let value = data[dt]
+        if(data[dt]) {
+          value = sqlstring.escape(data[dt].trim())
+        }
         if(!values) {
           values = `(${value}`
         } else {

@@ -6,9 +6,9 @@ let caching = new CacheFhirToES({
   since: '', //use this to specify last updated time of resources to be processed
   relationshipsIDs: ['ihris-es-report-grievance'], //if not specified then all relationships will be processed
   reset: true, //will pull all resources if set to true
-  ESModulesBasePath: "/home/ally/iHRIS/ihris-backend/namibia/modules/es",
+  ESModulesBasePath: "/var/lib/iHRIS/ihris-backend/my-site/modules/es",
   DBConnection: {
-    database: "chadihris",
+    database: "hapi",
     username: "hapi",
     password: "hapi",
     dialect: "postgres" /* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */
