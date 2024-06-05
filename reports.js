@@ -1489,8 +1489,11 @@ class CacheFhirToES {
           let resVersion = data.request.url.split('/').pop()
           let oldUrlArr = data.request.url.split('/')
           oldUrlArr[oldUrlArr.length - 1] = parseInt(resVersion) - 1
-          let url = oldUrlArr.join('/')
-          axios.get(url, {
+          let url = URI(this.FHIRBaseURL)
+          for(let segment of oldUrlArr) {
+            url.segment(segment.toString())
+          }
+          axios.get(url.toString(), {
             headers: {
               'Cache-Control': 'no-cache',
             },
