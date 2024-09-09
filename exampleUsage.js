@@ -4,7 +4,7 @@ let caching = new CacheFhirToES({
   FHIRUsername: '',
   FHIRPassword: '',
   since: '', //use this to specify last updated time of resources to be processed
-  relationshipsIDs: ['ihris-es-report-grievance'], //if not specified then all relationships will be processed
+  relationshipsIDs: ['ihris-es-career-promotion-report-ethiopia'], //if not specified then all relationships will be processed
   reset: true, //will pull all resources if set to true
   ESModulesBasePath: "/var/lib/iHRIS/ihris-backend/my-site/modules/es",
   DBConnection: {
